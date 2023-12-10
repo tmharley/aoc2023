@@ -84,10 +84,6 @@ def parse(input)
   [tiles, pipes, start_point]
 end
 
-def pipe?(symbol)
-  symbol != '.'
-end
-
 def part_one(input)
   tiles, pipes, start_point = parse(input)
   loc = start_point
@@ -139,10 +135,8 @@ def part_two(input)
         case pipes[loc]
         when '|'
           # inside is to the west
-          loc_to_check = [loc[0] - 1, loc[1]]
-          unless main_loop.include?(loc_to_check) || inside_locations.include?(loc_to_check)
-            inside_locations << loc_to_check
-          end
+          ltc = [loc[0] - 1, loc[1]]
+          inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
         when 'L'
           # inside is to the west/south
           locs_to_check = [
@@ -153,17 +147,13 @@ def part_two(input)
           locs_to_check.each do |ltc|
             inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
           end
-        when 'J'
-          # inside is northwest, already covered
         end
       else
         # moved north, so came from south
         case pipes[loc]
         when '|' # inside is to the east
-          loc_to_check = [loc[0] + 1, loc[1]]
-          unless main_loop.include?(loc_to_check) || inside_locations.include?(loc_to_check)
-            inside_locations << loc_to_check
-          end
+          ltc = [loc[0] + 1, loc[1]]
+          inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
         when '7' # inside is to the east/north
           locs_to_check = [
             [loc[0] + 1, loc[1]], # east
@@ -173,47 +163,38 @@ def part_two(input)
           locs_to_check.each do |ltc|
             inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
           end
-        when 'F' # inside is southeast, already covered
+        end
+      end
+    elsif loc[0] == prev_loc[0] + 1
+      # moved east, so came from west
+      case pipes[loc]
+      when '-' # inside is to the south
+        ltc = [loc[0], loc[1] + 1]
+        inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
+      when 'J' # inside is to the south/east
+        locs_to_check = [
+          [loc[0] + 1, loc[1]], # east
+          [loc[0], loc[1] + 1], # south
+          [loc[0] + 1, loc[1] + 1] # southeast
+        ]
+        locs_to_check.each do |ltc|
+          inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
         end
       end
     else
-      # either east or west
-      if loc[0] == prev_loc[0] + 1 # moved east, so came from west
-        case pipes[loc]
-        when '-' # inside is to the south
-          loc_to_check = [loc[0], loc[1] + 1]
-          unless main_loop.include?(loc_to_check) || inside_locations.include?(loc_to_check)
-            inside_locations << loc_to_check
-          end
-        when 'J' # inside is to the south/east
-          locs_to_check = [
-            [loc[0] + 1, loc[1]], # east
-            [loc[0], loc[1] + 1], # south
-            [loc[0] + 1, loc[1] + 1] # southeast
-          ]
-          locs_to_check.each do |ltc|
-            inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
-          end
-        when '7' # inside is southwest, already covered
-        end
-      else
-        # moved west, so came from east
-        case pipes[loc]
-        when '-' # inside is to the north
-          loc_to_check = [loc[0], loc[1] - 1]
-          unless main_loop.include?(loc_to_check) || inside_locations.include?(loc_to_check)
-            inside_locations << loc_to_check
-          end
-        when 'F' # inside is to the north/west
-          locs_to_check = [
-            [loc[0] - 1, loc[1]], # west
-            [loc[0], loc[1] - 1], # north
-            [loc[0] - 1, loc[1] - 1] # northwest
-          ]
-          locs_to_check.each do |ltc|
-            inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
-          end
-        when 'L' # inside is northeast, already covered
+      # moved west, so came from east
+      case pipes[loc]
+      when '-' # inside is to the north
+        ltc = [loc[0], loc[1] - 1]
+        inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
+      when 'F' # inside is to the north/west
+        locs_to_check = [
+          [loc[0] - 1, loc[1]], # west
+          [loc[0], loc[1] - 1], # north
+          [loc[0] - 1, loc[1] - 1] # northwest
+        ]
+        locs_to_check.each do |ltc|
+          inside_locations << ltc unless main_loop.include?(ltc) || inside_locations.include?(ltc)
         end
       end
     end
